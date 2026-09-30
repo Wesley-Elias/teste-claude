@@ -3,19 +3,27 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLink } from "@/components/ArrowLink";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
-import { getAdjacentPosts, getPost } from "@/data/posts";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { usePost } from "@/lib/queries";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { formatDate } from "@/lib/utils";
 import NotFound from "./NotFound";
 
 export default function BlogPost() {
   const { slug = "" } = useParams();
-  const post = getPost(slug);
-  useDocumentTitle(post?.title ?? "Página não encontrada");
+  const query = usePost(slug);
+  const { post, previous, next } = query;
+  useDocumentTitle(post?.title ?? (query.isPending ? "Blog" : "Página não encontrada"));
 
+  if (query.isPending) return <LoadingBlock className="pt-36 md:pt-52" label="Carregando post" />;
+  if (query.isError) {
+    return (
+      <ErrorBlock className="pt-36 md:pt-52" onRetry={() => query.refetch()}>
+        Não foi possível carregar este post.
+      </ErrorBlock>
+    );
+  }
   if (!post) return <NotFound />;
-
-  const { previous, next } = getAdjacentPosts(post.slug);
 
   return (
     <article>

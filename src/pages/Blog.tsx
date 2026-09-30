@@ -3,13 +3,15 @@ import { Link } from "react-router-dom";
 import { PageIntro } from "@/components/PageIntro";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
-import { posts } from "@/data/posts";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { usePosts } from "@/lib/queries";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { formatDate } from "@/lib/utils";
 
 export default function Blog() {
   useDocumentTitle("Blog");
-  const [latest, ...rest] = posts;
+  const query = usePosts();
+  const [latest, ...rest] = query.data ?? [];
 
   return (
     <>
@@ -18,6 +20,13 @@ export default function Blog() {
       </PageIntro>
 
       <section className="container pb-28 md:pb-44">
+        {query.isPending && <LoadingBlock className="px-0 py-0 md:py-0" label="Carregando posts" />}
+        {query.isError && (
+          <ErrorBlock className="px-0 py-0 md:py-0" onRetry={() => query.refetch()}>
+            Não foi possível carregar os posts.
+          </ErrorBlock>
+        )}
+
         {/* Post mais recente em destaque, com imagem discreta */}
         {latest && (
           <Reveal as="article" className="border-t border-ink/80 pt-10 md:pt-14">
@@ -42,23 +51,25 @@ export default function Blog() {
         )}
 
         {/* Lista editorial sem thumbnails */}
-        <ul className="mt-20 border-t border-sand md:mt-32">
-          {rest.map((post, i) => (
-            <Reveal as="li" key={post.slug} delay={(i % 3) * 60} className="border-b border-sand">
-              <Link
-                to={`/blog/${post.slug}`}
-                className="group grid gap-4 py-10 md:grid-cols-12 md:items-baseline md:gap-8 md:py-12"
-              >
-                <p className="label md:col-span-2">{formatDate(post.date)}</p>
-                <h2 className="font-serif text-3xl font-light leading-tight tracking-tight transition-colors duration-300 ease-out group-hover:text-earth md:col-span-5 md:text-4xl">
-                  {post.title}
-                </h2>
-                <p className="text-sm font-light leading-relaxed text-ink/70 md:col-span-4">{post.excerpt}</p>
-                <p className="label md:col-span-1 md:text-right">{post.category}</p>
-              </Link>
-            </Reveal>
-          ))}
-        </ul>
+        {rest.length > 0 && (
+          <ul className="mt-20 border-t border-sand md:mt-32">
+            {rest.map((post, i) => (
+              <Reveal as="li" key={post.slug} delay={(i % 3) * 60} className="border-b border-sand">
+                <Link
+                  to={`/blog/${post.slug}`}
+                  className="group grid gap-4 py-10 md:grid-cols-12 md:items-baseline md:gap-8 md:py-12"
+                >
+                  <p className="label md:col-span-2">{formatDate(post.date)}</p>
+                  <h2 className="font-serif text-3xl font-light leading-tight tracking-tight transition-colors duration-300 ease-out group-hover:text-earth md:col-span-5 md:text-4xl">
+                    {post.title}
+                  </h2>
+                  <p className="text-sm font-light leading-relaxed text-ink/70 md:col-span-4">{post.excerpt}</p>
+                  <p className="label md:col-span-1 md:text-right">{post.category}</p>
+                </Link>
+              </Reveal>
+            ))}
+          </ul>
+        )}
       </section>
     </>
   );

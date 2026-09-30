@@ -6,16 +6,24 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
 import { Button } from "@/components/ui/button";
-import { awards, clients, publications } from "@/data/awards";
 import { IMAGES, img } from "@/data/images";
-import { featuredProjects, projectIndex } from "@/data/projects";
 import { site } from "@/data/site";
 import { scrollToId } from "@/lib/scrollToId";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { useProjects, useRecognition } from "@/lib/queries";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 export default function Home() {
   useDocumentTitle();
-  const [first, second, third, fourth] = featuredProjects;
+  const projectsQuery = useProjects();
+  const recognition = useRecognition();
+  const allProjects = projectsQuery.data ?? [];
+  const featured = allProjects.filter((p) => p.featured).slice(0, 4);
+  const [first, second, third, fourth] = featured;
+  const projectIndex = (slug: string) => allProjects.findIndex((p) => p.slug === slug) + 1;
+  const awards = recognition.data?.awards ?? [];
+  const clients = recognition.data?.clients ?? [];
+  const publications = recognition.data?.publications ?? [];
 
   return (
     <>
@@ -91,6 +99,12 @@ export default function Home() {
           </Reveal>
         </div>
 
+        {projectsQuery.isPending && <LoadingBlock className="px-0 py-0 md:py-0" label="Carregando projetos" />}
+        {projectsQuery.isError && (
+          <ErrorBlock className="px-0 py-0 md:py-0" onRetry={() => projectsQuery.refetch()}>
+            Não foi possível carregar os projetos.
+          </ErrorBlock>
+        )}
         <div className="grid gap-y-20 md:grid-cols-12 md:gap-x-8 md:gap-y-0">
           {first && (
             <Reveal className="md:col-span-7">

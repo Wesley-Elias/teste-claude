@@ -4,7 +4,8 @@ import { PageIntro } from "@/components/PageIntro";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
 import { IMAGES, img } from "@/data/images";
-import { services } from "@/data/services";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { useServices } from "@/lib/queries";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { pad } from "@/lib/utils";
 
@@ -17,6 +18,8 @@ const process = [
 
 export default function Services() {
   useDocumentTitle("Serviços");
+  const query = useServices();
+  const services = query.data ?? [];
 
   return (
     <>
@@ -41,6 +44,12 @@ export default function Services() {
       </section>
 
       <section aria-label="Lista de serviços" className="container pb-28 md:pb-44">
+        {query.isPending && <LoadingBlock className="px-0 py-0 md:py-0" label="Carregando serviços" />}
+        {query.isError && (
+          <ErrorBlock className="px-0 py-0 md:py-0" onRetry={() => query.refetch()}>
+            Não foi possível carregar os serviços.
+          </ErrorBlock>
+        )}
         <ol className="border-t border-ink/80">
           {services.map((s, i) => (
             <Reveal as="li" key={s.id} id={s.id} className="scroll-mt-28 border-b border-sand py-14 md:py-20">

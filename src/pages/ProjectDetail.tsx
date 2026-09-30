@@ -3,7 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLink } from "@/components/ArrowLink";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
-import { getNextProject, getProject, projectIndex } from "@/data/projects";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { useProject } from "@/lib/queries";
 import type { ProjectImage } from "@/lib/types";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { cn, pad } from "@/lib/utils";
@@ -28,13 +29,21 @@ function galleryLayout(image: ProjectImage, i: number) {
 
 export default function ProjectDetail() {
   const { slug = "" } = useParams();
-  const project = getProject(slug);
-  useDocumentTitle(project?.name ?? "Página não encontrada");
+  const query = useProject(slug);
+  const { project, next } = query;
+  useDocumentTitle(project?.name ?? (query.isPending ? "Projetos" : "Página não encontrada"));
 
-  if (!project) return <NotFound />;
+  if (query.isPending) return <LoadingBlock className="pt-36 md:pt-52" label="Carregando projeto" />;
+  if (query.isError) {
+    return (
+      <ErrorBlock className="pt-36 md:pt-52" onRetry={() => query.refetch()}>
+        Não foi possível carregar este projeto.
+      </ErrorBlock>
+    );
+  }
+  if (!project || !next) return <NotFound />;
 
-  const next = getNextProject(project.slug);
-  const number = pad(projectIndex(project.slug));
+  const number = pad(query.number);
 
   const meta = [
     { label: "Ano", value: String(project.year) },

@@ -4,7 +4,9 @@ import { useSearchParams } from "react-router-dom";
 import { PageIntro } from "@/components/PageIntro";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Reveal } from "@/components/Reveal";
-import { CATEGORIES, projectIndex, projects } from "@/data/projects";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { CATEGORIES } from "@/data/projects";
+import { useProjects } from "@/lib/queries";
 import type { ProjectCategory } from "@/lib/types";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { cn } from "@/lib/utils";
@@ -17,13 +19,16 @@ const RIGHT_RATIOS = ["tall", "square", "portrait"] as const;
 export default function Projects() {
   useDocumentTitle("Projetos");
   const [params, setParams] = useSearchParams();
+  const query = useProjects();
+  const projects = useMemo(() => query.data ?? [], [query.data]);
+  const projectIndex = (slug: string) => projects.findIndex((p) => p.slug === slug) + 1;
 
   const current = (params.get("categoria") ?? "Todos") as Filter;
   const active: Filter = current === "Todos" || CATEGORIES.includes(current as ProjectCategory) ? current : "Todos";
 
   const filtered = useMemo(
     () => (active === "Todos" ? projects : projects.filter((p) => p.category === active)),
-    [active],
+    [active, projects],
   );
 
   // Divide em duas colunas de larguras diferentes para o layout assimétrico
@@ -73,7 +78,13 @@ export default function Projects() {
           </p>
         </Reveal>
 
-        {filtered.length === 0 ? (
+        {query.isPending ? (
+          <LoadingBlock className="px-0 py-0 md:py-0" label="Carregando projetos" />
+        ) : query.isError ? (
+          <ErrorBlock className="px-0 py-0 md:py-0" onRetry={() => query.refetch()}>
+            Não foi possível carregar os projetos.
+          </ErrorBlock>
+        ) : filtered.length === 0 ? (
           <p className="py-24 text-center font-serif text-2xl font-light text-muted-foreground">
             Nenhum projeto nesta categoria por enquanto.
           </p>

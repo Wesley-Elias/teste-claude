@@ -4,12 +4,16 @@ import { PageIntro } from "@/components/PageIntro";
 import { Reveal } from "@/components/Reveal";
 import { SmartImage } from "@/components/SmartImage";
 import { IMAGES, img } from "@/data/images";
-import { milestones, team, values } from "@/data/team";
+import { milestones, values } from "@/data/team";
+import { ErrorBlock, LoadingBlock } from "@/components/QueryState";
+import { useTeam } from "@/lib/queries";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { pad } from "@/lib/utils";
 
 export default function About() {
   useDocumentTitle("Sobre");
+  const teamQuery = useTeam();
+  const team = teamQuery.data ?? [];
 
   return (
     <>
@@ -144,6 +148,12 @@ export default function About() {
           </Reveal>
         </div>
 
+        {teamQuery.isPending && <LoadingBlock className="px-0 py-0 md:py-0" label="Carregando equipe" />}
+        {teamQuery.isError && (
+          <ErrorBlock className="px-0 py-0 md:py-0" onRetry={() => teamQuery.refetch()}>
+            Não foi possível carregar a equipe.
+          </ErrorBlock>
+        )}
         <ul className="grid grid-cols-2 gap-x-5 gap-y-14 md:grid-cols-12 md:gap-x-8 md:gap-y-24">
           {team.map((m, i) => {
             // Alterna posições e alturas para manter o ritmo assimétrico

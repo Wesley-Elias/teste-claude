@@ -12,26 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { IMAGES, img } from "@/data/images";
 import { site } from "@/data/site";
+import { sendContactMessage } from "@/lib/api";
 import { contactSchema, type ContactFormValues } from "@/lib/contact-schema";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { cn } from "@/lib/utils";
-
-/**
- * Envio simulado. Para plugar uma API real, substitua o corpo desta função, por exemplo:
- *
- *   const res = await fetch("/api/contato", {
- *     method: "POST",
- *     headers: { "Content-Type": "application/json" },
- *     body: JSON.stringify(values),
- *   });
- *   if (!res.ok) throw new Error("Falha no envio");
- *
- * Serviços como Formspree, Resend ou uma função serverless funcionam bem aqui.
- */
-async function sendContact(values: ContactFormValues) {
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-  console.log("[ARCH STUDIO] Mensagem de contato:", values);
-}
 
 export default function Contact() {
   useDocumentTitle("Contato");
@@ -52,7 +36,7 @@ export default function Contact() {
 
   const onSubmit = async (values: ContactFormValues) => {
     try {
-      await sendContact(values);
+      await sendContactMessage(values);
       toast.success("Mensagem enviada", {
         description: "Obrigado pelo contato. Respondemos em até dois dias úteis.",
       });
