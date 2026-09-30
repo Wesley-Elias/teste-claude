@@ -12,9 +12,16 @@ npm run build     # build de produção em /dist
 npm run preview   # pré-visualiza o build
 ```
 
-Hospedagem: o site usa rotas reais (`/projetos/casa-do-vale`). Configure o servidor para
-responder `index.html` em qualquer rota (o arquivo `public/_redirects` já faz isso na Netlify;
-na Vercel isso é automático para projetos Vite). Se a hospedagem não permitir, gere o build com
+## Publicar na Vercel
+
+1. Em [vercel.com/new](https://vercel.com/new), importe o repositório do GitHub.
+2. A Vercel detecta o Vite sozinha. As configurações ficam em `vercel.json`
+   (build `npm run build`, saída `dist`), então não é preciso mudar nada na tela de importação.
+3. Clique em Deploy. A cada push no branch `main` o site é publicado de novo.
+
+O `vercel.json` redireciona todas as rotas para `index.html`, para que links diretos como
+`/projetos/casa-do-vale` funcionem. Em outras hospedagens, configure o mesmo fallback
+(o arquivo `public/_redirects` já faz isso na Netlify) ou gere o build com
 `VITE_HASH_ROUTER=true npm run build` para usar rotas com `#`.
 
 ## Onde trocar conteúdo
