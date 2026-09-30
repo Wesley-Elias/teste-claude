@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Paleta da marca (HSL sem a função, para suportar opacidade) */
+    --paper: 40 23% 95%; /* #F5F3EF */
+    --ink: 0 0% 10%; /* #1A1A1A */
+    --sand: 35 24% 80%; /* #D9CFC1 */
+    --stone: 30 4% 52%; /* #8A8580 */
+    --earth: 26 17% 37%; /* #6E5C4E */
+
+    /* Mapeamento semântico usado pelos componentes shadcn/ui */
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --primary: var(--ink);
+    --primary-foreground: var(--paper);
+    --secondary: var(--sand);
+    --secondary-foreground: var(--ink);
+    --muted: 38 20% 91%;
+    /* Cinza pedra escurecido para textos pequenos com contraste AA sobre o papel */
+    --muted-foreground: 30 4% 40%;
+    --accent: var(--earth);
+    --accent-foreground: var(--paper);
+    --destructive: 8 45% 38%;
+    --destructive-foreground: var(--paper);
+    --border: var(--sand);
+    --input: var(--stone);
+    --ring: var(--earth);
+    --radius: 0px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif font-light;
+  }
+
+  ::selection {
+    @apply bg-sand text-ink;
+  }
+
+  :focus-visible {
+    @apply outline outline-1 outline-offset-4 outline-earth;
+  }
+}
+
+@layer components {
+  /* Rótulo pequeno em caixa alta com tracking aberto: "01 · RESIDENCIAL" */
+  .label {
+    @apply font-sans text-label font-normal uppercase text-muted-foreground;
+  }
+
+  /* Link editorial: sublinhado fino que cresce no hover */
+  .link-underline {
+    @apply relative inline-block transition-colors duration-300 ease-out hover:text-earth;
+  }
+  .link-underline::after {
+    content: "";
+    @apply absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-100 bg-current transition-transform duration-400 ease-out;
+  }
+  .link-underline:hover::after {
+    @apply origin-right scale-x-0;
+  }
+
+  .link-quiet {
+    @apply transition-colors duration-300 ease-out hover:text-earth;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-sand;
+  }
+
+  /* Corpo de texto editorial (posts e descrições) */
+  .prose-editorial p {
+    @apply mb-6 text-[1.0625rem] font-light leading-[1.85] text-ink/85;
+  }
+  .prose-editorial h2 {
+    @apply mb-6 mt-14 font-serif text-3xl font-light leading-tight tracking-tight md:text-4xl;
+  }
+  .prose-editorial blockquote {
+    @apply my-12 border-l border-sand pl-6 font-serif text-2xl font-light italic leading-snug text-ink md:text-3xl;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
